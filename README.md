@@ -1,9 +1,5 @@
 # Elastic Stack (ELK) on Docker with Fixed IP and WireGuard VPN for pcap Analysis
 
-[![Elastic Stack version](https://img.shields.io/badge/Elastic%20Stack-8.17.0-00bfb3?style=flat&logo=elastic-stack)](https://www.elastic.co/blog/category/releases)
-[![Build Status](https://github.com/deviantony/docker-elk/workflows/CI/badge.svg?branch=main)](https://github.com/deviantony/docker-elk/actions?query=workflow%3ACI+branch%3Amain)
-[![Join the chat](https://badges.gitter.im/Join%20Chat.svg)](https://app.gitter.im/#/room/#deviantony_docker-elk:gitter.im)
-
 Customized and enhanced the ELK stack based on [deviantony/docker-elk](https://github.com/deviantony/docker-elk), that enables seamless integration of PCAP files as logs for analysis. This setup is deployed on a fixed IP within a local network, utilizing a VPN for secure access. Additionally, I have included a `catch_pcap.py` script, which captures network traffic and generates PCAP files that can be directly ingested into ELK. This solution provides a centralized and scalable approach for network traffic monitoring, log analysis, and security investigations.
 
 >[!note]
