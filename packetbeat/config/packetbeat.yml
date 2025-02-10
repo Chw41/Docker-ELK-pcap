@@ -1,0 +1,28 @@
+packetbeat.interfaces.device: any
+
+packetbeat.protocols:
+  - type: http
+    ports: [80, 8080, 8000, 443]
+    parse_all_headers: true
+    parse_authorization: true
+    send_headers: true
+    send_all_headers: true
+    include_body_for: ["application/json", "text/html", "text/plain"]
+    max_message_size: 10MB
+
+  - type: tls
+    ports: [443]
+
+  - type: tcp
+    ports: [-1]  # Capture all TCP ports
+
+  - type: dns
+    ports: [53]
+
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+  index: "packetbeat-%{+yyyy.MM.dd}"
+
+setup.template.name: "packetbeat"
+setup.template.pattern: "packetbeat-*"
+setup.ilm.enabled: false

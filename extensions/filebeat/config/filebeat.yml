@@ -1,0 +1,15 @@
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /pcap/*.pcap
+  scan_frequency: 5m
+  file_identity.path: true
+
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+  username: ${FILEBEAT_INTERNAL_PASSWORD}
+  password: ${FILEBEAT_INTERNAL_PASSWORD}
+
+setup.kibana:
+  host: "http://kibana:5601"

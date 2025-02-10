@@ -1,0 +1,125 @@
+services:
+
+  setup:
+    profiles:
+      - setup
+    build:
+      context: setup/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    init: true
+    volumes:
+      - ./setup/entrypoint.sh:/entrypoint.sh:ro,Z
+      - ./setup/lib.sh:/lib.sh:ro,Z
+      - ./setup/roles:/roles:ro,Z
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
+      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
+    networks:
+      - elk
+      
+    depends_on:
+      - elasticsearch
+
+  elasticsearch:
+    build:
+      context: elasticsearch/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    volumes:
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
+      - elasticsearch:/usr/share/elasticsearch/data:Z
+    ports:
+      - "172.27.71.7:9200:9200"
+      - "172.27.71.7:9300:9300"
+    environment:
+      node.name: elasticsearch
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
+      discovery.type: single-node
+    networks:
+      elk:
+        ipv4_address: 172.27.71.7
+    restart: unless-stopped
+
+  logstash:
+    build:
+      context: logstash/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    volumes:
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
+      - ./logstash/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro,Z
+      - ./pcap:/pcap:ro
+    ports:
+      - "172.27.71.7:5044:5044"
+      - "172.27.71.7:50000:50000/tcp"
+      - "172.27.71.7:50000:50000/udp"
+      - "172.27.71.7:9600:9600"
+    environment:
+      LS_JAVA_OPTS: -Xms256m -Xmx256m
+      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
+    networks:
+      elk:
+        ipv4_address: 172.27.71.8
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  kibana:
+    build:
+      context: kibana/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    volumes:
+      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
+    ports:
+      - "172.27.71.7:5601:5601"
+    environment:
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
+    networks:
+      elk:
+        ipv4_address: 172.27.71.9
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  #filebeat:
+  #  build:
+  #    context: filebeat/
+  #    args:
+  #      ELASTIC_VERSION: ${ELASTIC_VERSION}
+  #  volumes:
+  #    - ./pcap:/pcap:ro
+  #    - ./extension/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+  #  depends_on:
+  #    - elasticsearch
+  #    - kibana
+  #  networks:
+  #    - elk
+  #  restart: unless-stopped
+
+  packetbeat:
+    image: docker.elastic.co/beats/packetbeat:${ELASTIC_VERSION}
+    volumes:
+      - ./pcap:/pcap:ro
+      - ./packetbeat/config/packetbeat.yml:/usr/share/packetbeat/packetbeat.yml:ro
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+networks:
+  elk:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "172.27.71.0/24"
+          gateway: "172.27.71.1"
+
+volumes:
+  elasticsearch:
