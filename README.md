@@ -1,4 +1,4 @@
-# Elastic stack (ELK) on Docker
+# Elastic Stack (ELK) on Docker with Fixed IP and WireGuard VPN for pcap Analysis
 
 [![Elastic Stack version](https://img.shields.io/badge/Elastic%20Stack-8.17.0-00bfb3?style=flat&logo=elastic-stack)](https://www.elastic.co/blog/category/releases)
 [![Build Status](https://github.com/deviantony/docker-elk/workflows/CI/badge.svg?branch=main)](https://github.com/deviantony/docker-elk/actions?query=workflow%3ACI+branch%3Amain)
@@ -201,6 +201,40 @@ Open a browser and navigate to: http://172.27.71.7:5601/\
 ![image](https://hackmd.io/_uploads/H1rwqPvOJl.png)
 
 
-## catch_pcap.py
+## Automates the downloading of .pcap files: `catch_pcap.py`
+Define the target URL (pcap_target): Replace `'{your_pcap_target_url}'` with the actual base URL for fetching `.pcap` files.\
+Set up headers: If an authentication token is required, ensure it is valid.
+
+```python
+url_template = '{your_pcap_target_url}/pcap/{TeamID}/{}'  # Replace with the actual target URL
+headers = {
+    'accept': 'application/json',
+    # Replace with a valid authorization token if needed
+}
+```
+
+Iterate over a range of round numbers (1-180): It constructs the download URL for each `.pcap` file.\
+Check already downloaded files: The script skips files that are already present.
+
+```python
+for round_number in range(1, 180):
+    file_name = f'{round_number}.pcap'
+    
+    if file_name in already_downloaded:
+        continue
+    
+    url = url_template.format(round_number)
+    
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        with open(os.path.join(save_path, file_name), 'wb') as f:
+            f.write(response.content)
+        print(f'Catch Round: {round_number} Success')
+    else:
+        print(f'Round: {round_number} Fail，Status Code：{response.status_code}')
+    
+    time.sleep(3)
+```
 
 
