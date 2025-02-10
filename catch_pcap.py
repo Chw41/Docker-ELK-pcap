@@ -14,7 +14,7 @@ if not os.path.exists(save_path):
 
 already_downloaded = set(os.listdir(save_path))
 
-for round_number in range(90, 180):
+for round_number in range(1, 180):
     file_name = f'{round_number}.pcap'
     
     if file_name in already_downloaded:
