@@ -16,11 +16,6 @@ Based on the [official Docker images][elastic-docker] from Elastic:
 * [Logstash](https://github.com/elastic/logstash/tree/main/docker)
 * [Kibana](https://github.com/elastic/kibana/tree/main/src/dev/build/tasks/os_packages/docker_generator)
 
-Other available stack variants:
-
-* [`tls`](https://github.com/deviantony/docker-elk/tree/tls): TLS encryption enabled in Elasticsearch, Kibana (opt in),
-  and Fleet
-
 
 ---
 
