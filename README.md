@@ -58,7 +58,7 @@ By default, the stack exposes the following ports:
 
 ## Setting a Fixed IP in the Local Network
 >[!Note]
->Environment: Using WireGuard on Mac
+>Environment: Using WireGuard on Mac\
 >Example: Deploying ELK on 172.27.71.7
 ### Editing `docker-compose.yml`
 ```
